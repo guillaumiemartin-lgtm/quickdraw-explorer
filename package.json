@@ -1,0 +1,16 @@
+{
+  "name": "quickdraw-explorer",
+  "productName": "Carnet QuickDraw",
+  "version": "1.1.0",
+  "description": "Offline viewer and editor for Google Quick, Draw! .ndjson files. Made by Martin Guillaumie.",
+  "main": "main.js",
+  "author": "Martin Guillaumie",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build:win": "electron-packager . \"Carnet QuickDraw\" --platform=win32 --arch=x64 --electron-version=32.2.7 --out=dist --overwrite --ignore=node_modules --ignore=dist --ignore=docs"
+  },
+  "devDependencies": {
+    "electron-packager": "^17.1.2"
+  }
+}

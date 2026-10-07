@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Carnet QuickDraw</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+  /* ===== theme.css — "Lisa/Mac System 1" bleu ===== */
+  :root {
+    --text: #325be5;
+    --text-h: #325be5;
+    --bg: #ffffff;
+    --panel-bg: #ffffff;
+    --panel-border: #325be5;
+    --accent: #325be5;
+    --accent-contrast: #ffffff;
+    --accent-tint-12: rgba(50, 91, 229, 0.12);
+    --accent-tint-08: rgba(50, 91, 229, 0.08);
+    --accent-light: #e6ecfc;
+    --sans: 'Outfit', system-ui, 'Segoe UI', Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; border-radius: 0 !important; transition: none !important; animation: none !important; }
+  html, body { margin: 0; width: 100%; height: 100%; }
+  body {
+    font: 400 14px/145% var(--sans);
+    color: var(--text);
+    background: var(--bg);
+    color-scheme: light;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3 { margin: 0; font-weight: 700; color: var(--text-h); }
+
+  .window { background: var(--panel-bg); border: 2px solid var(--panel-border); box-shadow: 4px 4px 0px var(--accent); overflow: hidden; }
+  .window-titlebar { background: var(--accent); color: var(--accent-contrast); padding: 8px 12px; text-align: center; border-bottom: 2px solid var(--accent); }
+  .window-titlebar h1 { font-size: 16px; color: var(--accent-contrast); }
+  .window-eyebrow { display: block; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 400; color: var(--accent-contrast); margin-bottom: 2px; }
+  .window-body { padding: 16px; }
+
+  .btn {
+    appearance: none; -webkit-appearance: none;
+    border: 2px solid var(--accent); background: var(--panel-bg); color: var(--accent);
+    font: inherit; font-size: 13px; font-weight: 700; padding: 8px 16px; cursor: pointer;
+  }
+  .btn:hover:not(:disabled) { background: var(--accent); color: var(--accent-contrast); }
+  .btn.is-active { background: var(--accent); color: var(--accent-contrast); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn:focus-visible { outline: 1px dotted var(--accent); outline-offset: 2px; }
+  .btn-sm { font-size: 11px; font-weight: 400; padding: 6px 10px; }
+  .btn-group { display: inline-flex; gap: 2px; }
+  .btn-group.is-joined { gap: 0; border: 2px solid var(--accent); }
+  .btn-group.is-joined .btn { border: none; padding: 10px 14px; font-size: 12px; font-weight: 700; flex: 1; }
+  .btn-group.is-joined .btn + .btn { border-left: 2px solid var(--accent); }
+
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-h); border: 2px solid var(--accent); padding: 3px 8px; white-space: nowrap; }
+  .text-tabular { font-variant-numeric: tabular-nums; }
+  .shadow-sm { box-shadow: 3px 3px 0px var(--accent); }
+  .shadow-md { box-shadow: 4px 4px 0px var(--accent); }
+  .shadow-lg { box-shadow: 6px 6px 0px var(--accent); }
+
+  /* ===== Badge de crédit (logo) ===== */
+  .credit { display: inline-flex; border: 2px solid var(--accent); font-size: 11px; line-height: 1; user-select: none; }
+  .credit .cc { background: var(--accent); color: var(--accent-contrast); font-weight: 700; letter-spacing: 0.04em; padding: 6px 8px; }
+  .credit .by { color: var(--accent); font-weight: 700; padding: 6px 9px; }
+
+  /* ===== App layout ===== */
+  body { display: flex; justify-content: center; padding: 40px 16px; }
+  .app { width: 100%; max-width: 620px; }
+
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .row + .row, input[type=file] + .row { margin-top: 10px; }
+
+  .lang-group .btn { padding: 4px 10px; font-size: 11px; flex: 0 0 auto; }
+
+  .stage { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 20px 0 10px; }
+  .arrow-btn { width: 42px; height: 42px; padding: 0; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .arrow-btn svg { width: 18px; height: 18px; stroke: currentColor; }
+
+  .canvas-frame { width: 300px; height: 300px; background: var(--panel-bg); border: 2px solid var(--accent); box-shadow: 4px 4px 0px var(--accent); flex: 0 0 auto; position: relative; }
+  .canvas-frame svg.canvas { width: 100%; height: 100%; display: block; }
+  .empty-msg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px; color: var(--text); opacity: .55; padding: 20px; }
+
+  .meta-row { display: flex; justify-content: space-between; align-items: baseline; margin: 10px 2px 0; font-size: 12px; }
+  .caption { font-weight: 700; color: var(--text-h); font-size: 14px; }
+  .idx { color: var(--text); opacity: .6; }
+
+  .hint { margin-top: 18px; font-size: 11px; color: var(--text); opacity: .55; text-align: center; }
+  kbd { border: 1px solid var(--accent); padding: 1px 5px; font-family: inherit; }
+  .footer { margin-top: 18px; display: flex; justify-content: center; }
+
+  input[type=file] { display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="window shadow-lg">
+    <div class="window-titlebar">
+      <span class="window-eyebrow">QuickDraw</span>
+      <h1 data-i18n="title">Carnet de dessins</h1>
+    </div>
+    <div class="window-body">
+
+      <div class="row" style="justify-content:flex-end; margin-bottom:12px;">
+        <div class="btn-group is-joined lang-group" role="tablist" aria-label="Language / Langue">
+          <button class="btn" data-lang="fr" role="tab">FR</button>
+          <button class="btn" data-lang="en" role="tab">EN</button>
+        </div>
+      </div>
+
+      <div class="row-between">
+        <button class="btn" id="openBtn" data-i18n="open">Ouvrir un fichier .ndjson</button>
+        <span class="badge" id="stat"></span>
+      </div>
+      <input type="file" id="fileInput" accept=".ndjson,.json,.txt">
+
+      <div class="row">
+        <button class="btn btn-sm" id="previewBtn" data-i18n="preview" disabled>Aperçu de la collection</button>
+      </div>
+
+      <div class="stage">
+        <button class="btn arrow-btn" id="prevBtn" disabled data-i18n-title="prev">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+
+        <div class="canvas-frame">
+          <svg class="canvas" id="canvas" viewBox="0 0 300 300"></svg>
+          <div class="empty-msg" id="emptyMsg"></div>
+        </div>
+
+        <button class="btn arrow-btn" id="nextBtn" disabled data-i18n-title="next">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <div class="meta-row">
+        <span class="caption" id="caption"></span>
+        <span class="idx text-tabular" id="idxLabel"></span>
+      </div>
+
+      <div class="row" style="margin-top:16px;">
+        <div class="btn-group is-joined" style="width:100%;">
+          <button class="btn" id="randomBtn" data-i18n="random" disabled>Au hasard</button>
+          <button class="btn" id="editBtn" data-i18n="edit" disabled>Éditer</button>
+          <button class="btn" id="exportBtn" data-i18n="exportSvg" disabled>Exporter SVG</button>
+        </div>
+      </div>
+
+      <p class="hint" data-i18n-html="hint"></p>
+
+      <div class="footer">
+        <span class="credit"><span class="cc">CC BY 4.0</span><span class="by">Made by Martin Guillaumie</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const ACCENT = '#325be5';
+  const ACCENT_LIGHT = '#e6ecfc';
+
+  /*I18N_START*/
+  const I18N = {
+    fr: {
+      docTitle: 'Carnet QuickDraw',
+      title: 'Carnet de dessins',
+      open: 'Ouvrir un fichier .ndjson',
+      preview: 'Aperçu de la collection',
+      prev: 'Précédent (←)',
+      next: 'Suivant (→)',
+      random: 'Au hasard',
+      edit: 'Éditer',
+      exportSvg: 'Exporter SVG',
+      hint: 'Navigue avec <kbd>←</kbd> <kbd>→</kbd> une fois un fichier chargé.',
+      emptyIntro: 'Ouvre un fichier .ndjson QuickDraw pour voir apparaître les dessins ici',
+      unreadable: 'Impossible de lire ce dessin (ligne {n})',
+      noLabel: '(sans étiquette)',
+      statNone: 'Aucun fichier chargé',
+      statReading: 'Lecture…',
+      statEmpty: 'Fichier vide ou illisible',
+      statError: 'Erreur de lecture',
+      statCount: '{n} dessins',
+      popupBlocked: 'La fenêtre a été bloquée par le navigateur. Autorise les pop-ups pour ce site puis réessaie.',
+      editing: 'Édition',
+      editDocTitle: 'Éditer',
+      editHint: 'Point : clique pour sélectionner, glisse pour déplacer (Maj+clic pour ajouter/retirer). Zone : clique-glisse sur le fond pour sélectionner un groupe de points. Segment : clique un trait entre deux points pour le sélectionner — pratique pour ouvrir une courbe fermée. Supprime la sélection avec le bouton ou la touche <b>Suppr</b>.',
+      delSel: 'Supprimer la sélection',
+      reset: 'Réinitialiser',
+      sendBack: 'Renvoyer au carnet',
+      exportSvgLong: 'Exporter en SVG',
+      previewTitle: 'Aperçu de la collection',
+      previewCount: '{n} dessins sur {total}',
+      newPreview: 'Nouvel aperçu'
+    },
+    en: {
+      docTitle: 'QuickDraw Sketchbook',
+      title: 'Sketchbook',
+      open: 'Open an .ndjson file',
+      preview: 'Collection preview',
+      prev: 'Previous (←)',
+      next: 'Next (→)',
+      random: 'Random',
+      edit: 'Edit',
+      exportSvg: 'Export SVG',
+      hint: 'Use <kbd>←</kbd> <kbd>→</kbd> to navigate once a file is loaded.',
+      emptyIntro: 'Open a QuickDraw .ndjson file to see the drawings here',
+      unreadable: "Can't read this drawing (line {n})",
+      noLabel: '(no label)',
+      statNone: 'No file loaded',
+      statReading: 'Reading…',
+      statEmpty: 'Empty or unreadable file',
+      statError: 'Read error',
+      statCount: '{n} drawings',
+      popupBlocked: 'The window was blocked by the browser. Allow pop-ups for this site and try again.',
+      editing: 'Editing',
+      editDocTitle: 'Edit',
+      editHint: 'Point: click to select, drag to move (Shift+click to add/remove). Area: click-drag on the background to select a group of points. Segment: click a line between two points to select it — handy for opening a closed curve. Delete the selection with the button or the <b>Del</b> key.',
+      delSel: 'Delete selection',
+      reset: 'Reset',
+      sendBack: 'Send back to sketchbook',
+      exportSvgLong: 'Export as SVG',
+      previewTitle: 'Collection preview',
+      previewCount: '{n} drawings out of {total}',
+      newPreview: 'New preview'
+    }
+  };
+  /*I18N_END*/
+
+  const THEME_CSS = `
+    :root{--text:#325be5;--text-h:#325be5;--bg:#ffffff;--panel-bg:#ffffff;--panel-border:#325be5;--accent:#325be5;--accent-contrast:#ffffff;--accent-light:#e6ecfc;--sans:'Outfit',system-ui,'Segoe UI',Roboto,sans-serif;}
+    *{box-sizing:border-box;border-radius:0 !important;transition:none !important;animation:none !important;}
+    html,body{margin:0;}
+    body{font:400 14px/145% var(--sans);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
+    h1,h2,h3{margin:0;font-weight:700;color:var(--text-h);}
+    .window{background:var(--panel-bg);border:2px solid var(--panel-border);box-shadow:4px 4px 0px var(--accent);overflow:hidden;}
+    .window-titlebar{background:var(--accent);color:var(--accent-contrast);padding:8px 12px;text-align:center;border-bottom:2px solid var(--accent);}
+    .window-titlebar h1{font-size:16px;color:var(--accent-contrast);}
+    .window-eyebrow{display:block;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;font-weight:400;color:var(--accent-contrast);margin-bottom:2px;}
+    .window-body{padding:16px;}
+    .btn{appearance:none;-webkit-appearance:none;border:2px solid var(--accent);background:var(--panel-bg);color:var(--accent);font:inherit;font-size:13px;font-weight:700;padding:8px 16px;cursor:pointer;}
+    .btn:hover:not(:disabled){background:var(--accent);color:var(--accent-contrast);}
+    .btn:disabled{opacity:0.35;cursor:not-allowed;}
+    .btn-sm{font-size:11px;font-weight:400;padding:6px 10px;}
+    .badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-h);border:2px solid var(--accent);padding:3px 8px;white-space:nowrap;}
+    .text-tabular{font-variant-numeric:tabular-nums;}
+    .shadow-md{box-shadow:4px 4px 0px var(--accent);}
+    .shadow-lg{box-shadow:6px 6px 0px var(--accent);}
+    .credit{display:inline-flex;border:2px solid var(--accent);font-size:11px;line-height:1;user-select:none;}
+    .credit .cc{background:var(--accent);color:var(--accent-contrast);font-weight:700;letter-spacing:0.04em;padding:6px 8px;}
+    .credit .by{color:var(--accent);font-weight:700;padding:6px 9px;}
+    .footer{margin-top:6px;display:flex;justify-content:center;}
+  `;
+  const CREDIT_HTML = '<span class="credit"><span class="cc">CC BY 4.0</span><span class="by">Made by Martin Guillaumie</span></span>';
+
+  // ---------- Langue ----------
+  let lang = 'fr';
+  try {
+    const stored = localStorage.getItem('qd-lang');
+    if (stored === 'fr' || stored === 'en') lang = stored;
+    else lang = ((navigator.language || 'fr').toLowerCase().indexOf('en') === 0) ? 'en' : 'fr';
+  } catch(e) {
+    lang = ((navigator.language || 'fr').toLowerCase().indexOf('en') === 0) ? 'en' : 'fr';
+  }
+
+  function t(key, vars){
+    let s = (I18N[lang] && I18N[lang][key]) || I18N.fr[key] || key;
+    if (vars) Object.keys(vars).forEach(k => { s = s.split('{'+k+'}').join(vars[k]); });
+    return s;
+  }
+  function locale(){ return lang === 'fr' ? 'fr-FR' : 'en-US'; }
+
+  const fileInput = document.getElementById('fileInput');
+  const openBtn = document.getElementById('openBtn');
+  const stat = document.getElementById('stat');
+  const canvas = document.getElementById('canvas');
+  const emptyMsg = document.getElementById('emptyMsg');
+  const caption = document.getElementById('caption');
+  const idxLabel = document.getElementById('idxLabel');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const randomBtn = document.getElementById('randomBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const editBtn = document.getElementById('editBtn');
+  const previewBtn = document.getElementById('previewBtn');
+  const langBtns = Array.prototype.slice.call(document.querySelectorAll('[data-lang]'));
+
+  let lines = [];
+  let currentIndex = 0;
+  let currentDrawing = null;
+  let openWins = [];
+
+  // États "dynamiques" mémorisés pour pouvoir être retraduits
+  let statKey = 'statNone', statN = 0;
+  let emptyKey = 'emptyIntro', emptyN = 0;
+
+  function setStat(key, n){
+    statKey = key; statN = n || 0;
+    stat.textContent = t(key, { n: statN.toLocaleString(locale()) });
+  }
+  function setEmpty(key, n){
+    emptyKey = key; emptyN = n || 0;
+    emptyMsg.textContent = t(key, { n: emptyN });
+  }
+  function updateCaption(){
+    if (!currentDrawing) { caption.textContent = ''; return; }
+    caption.textContent = currentDrawing.word || t('noLabel');
+  }
+
+  function applyLang(){
+    document.documentElement.lang = lang;
+    document.title = t('docTitle');
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
+    langBtns.forEach(b => b.classList.toggle('is-active', b.getAttribute('data-lang') === lang));
+    setStat(statKey, statN);
+    setEmpty(emptyKey, emptyN);
+    updateCaption();
+    // prévenir les fenêtres secondaires déjà ouvertes
+    openWins = openWins.filter(w => w && !w.closed);
+    openWins.forEach(w => {
+      try { w.postMessage({ type: 'quickdraw-lang', lang: lang, strings: I18N[lang] }, '*'); } catch(e) {}
+    });
+  }
+
+  langBtns.forEach(b => b.addEventListener('click', () => {
+    lang = b.getAttribute('data-lang');
+    try { localStorage.setItem('qd-lang', lang); } catch(e) {}
+    applyLang();
+  }));
+
+  function registerWin(win){
+    if (win && openWins.indexOf(win) === -1) openWins.push(win);
+  }
+
+  // ---------- Fichier ----------
+  openBtn.addEventListener('click', ()=> fileInput.click());
+
+  fileInput.addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    setStat('statReading');
+    disableNav(true);
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      const text = ev.target.result;
+      lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+      if(lines.length===0){
+        setStat('statEmpty');
+        return;
+      }
+      currentIndex = 0;
+      setStat('statCount', lines.length);
+      renderAt(0);
+      disableNav(false);
+    };
+    reader.onerror = ()=>{ setStat('statError'); };
+    reader.readAsText(file);
+  });
+
+  function disableNav(isLoading){
+    const hasData = lines.length>0 && !isLoading;
+    prevBtn.disabled = !hasData;
+    nextBtn.disabled = !hasData;
+    randomBtn.disabled = !hasData;
+    exportBtn.disabled = !hasData;
+    editBtn.disabled = !hasData;
+    previewBtn.disabled = !hasData;
+  }
+
+  function parseLine(idx){
+    try{ return JSON.parse(lines[idx]); }catch(err){ return null; }
+  }
+
+  function buildScaledPolylines(drawing){
+    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    drawing.forEach(stroke=>{
+      const xs=stroke[0], ys=stroke[1];
+      for(let i=0;i<xs.length;i++){
+        if(xs[i]<minX)minX=xs[i];
+        if(xs[i]>maxX)maxX=xs[i];
+        if(ys[i]<minY)minY=ys[i];
+        if(ys[i]>maxY)maxY=ys[i];
+      }
+    });
+    const w = Math.max(maxX-minX, 1);
+    const h = Math.max(maxY-minY, 1);
+    const margin = 24;
+    const box = 300 - margin*2;
+    const scale = Math.min(box/w, box/h);
+    const offX = margin + (box - w*scale)/2;
+    const offY = margin + (box - h*scale)/2;
+    return drawing.map(stroke=>{
+      const xs=stroke[0], ys=stroke[1];
+      const pts=[];
+      for(let i=0;i<xs.length;i++){
+        pts.push({ x: offX + (xs[i]-minX)*scale, y: offY + (ys[i]-minY)*scale });
+      }
+      return pts;
+    });
+  }
+
+  function drawPolylines(polylines){
+    canvas.innerHTML = '';
+    const ns = 'http://www.w3.org/2000/svg';
+    polylines.forEach(pts=>{
+      const poly = document.createElementNS(ns,'polyline');
+      poly.setAttribute('points', pts.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' '));
+      poly.setAttribute('fill','none');
+      poly.setAttribute('stroke', ACCENT);
+      poly.setAttribute('stroke-width','5');
+      poly.setAttribute('stroke-linecap','round');
+      poly.setAttribute('stroke-linejoin','round');
+      canvas.appendChild(poly);
+    });
+  }
+
+  function renderAt(idx){
+    const obj = parseLine(idx);
+    canvas.innerHTML = '';
+    if(!obj || !obj.drawing){
+      emptyMsg.style.display='flex';
+      setEmpty('unreadable', idx+1);
+      currentDrawing = null;
+      updateCaption();
+      idxLabel.textContent = (idx+1)+' / '+lines.length;
+      return;
+    }
+    emptyMsg.style.display='none';
+    const polylines = buildScaledPolylines(obj.drawing);
+    currentDrawing = { word: obj.word || '', polylines };
+    drawPolylines(polylines);
+    updateCaption();
+    idxLabel.textContent = (idx+1)+' / '+lines.length;
+    currentIndex = idx;
+  }
+
+  function goTo(delta){
+    if(lines.length===0) return;
+    let next = currentIndex + delta;
+    if(next<0) next = lines.length-1;
+    if(next>=lines.length) next = 0;
+    renderAt(next);
+  }
+
+  prevBtn.addEventListener('click', ()=>goTo(-1));
+  nextBtn.addEventListener('click', ()=>goTo(1));
+  randomBtn.addEventListener('click', ()=>{
+    if(lines.length===0) return;
+    renderAt(Math.floor(Math.random()*lines.length));
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if(lines.length===0) return;
+    if(e.key==='ArrowLeft') goTo(-1);
+    if(e.key==='ArrowRight') goTo(1);
+  });
+
+  exportBtn.addEventListener('click', ()=>{
+    if(!currentDrawing) return;
+    const ns = 'http://www.w3.org/2000/svg';
+    let svg = '<svg xmlns="'+ns+'" viewBox="0 0 300 300" width="600" height="600">';
+    svg += '<rect width="300" height="300" fill="#ffffff"/>';
+    currentDrawing.polylines.forEach(pts=>{
+      const pointsStr = pts.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+      svg += '<polyline points="'+pointsStr+'" fill="none" stroke="'+ACCENT+'" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>';
+    });
+    svg += '</svg>';
+
+    const blob = new Blob([svg], {type:'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeName = (currentDrawing.word || 'dessin').replace(/[^a-z0-9_-]/gi,'_');
+    a.href = url;
+    a.download = safeName + '_' + (currentIndex+1) + '.svg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // ---------- Fenêtre d'édition ----------
+  editBtn.addEventListener('click', ()=>{
+    if(!currentDrawing) return;
+    const payload = {
+      word: currentDrawing.word,
+      index: currentIndex,
+      strokes: currentDrawing.polylines.map(pts => pts.map(p=>({x:p.x, y:p.y})))
+    };
+    const win = window.open('', 'quickdraw_editor_'+currentIndex, 'width=560,height=780');
+    if(!win){ alert(t('popupBlocked')); return; }
+    win.document.open();
+    win.document.write(buildEditorHtml(payload));
+    win.document.close();
+    registerWin(win);
+  });
+
+  window.addEventListener('message', (e)=>{
+    const msg = e.data;
+    if(!msg) return;
+    if(msg.type === 'quickdraw-edit-update' && msg.index === currentIndex && currentDrawing){
+      currentDrawing.polylines = msg.strokes;
+      drawPolylines(currentDrawing.polylines);
+    }
+    if(msg.type === 'quickdraw-request-preview'){
+      if(lines.length===0) return;
+      const payload = pickPreviewSample();
+      if(e.source) e.source.postMessage({type:'quickdraw-preview-data', payload: payload}, '*');
+    }
+  });
+
+  function buildEditorHtml(payload){
+    const dataJson = JSON.stringify(payload).replace(/</g,'\\u003c');
+    const strJson = JSON.stringify(I18N[lang]).replace(/</g,'\\u003c');
+    return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="UTF-8"><title></title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+${THEME_CSS}
+body{display:flex;flex-direction:column;align-items:center;padding:20px 16px 40px;gap:14px;}
+.hint{font-size:12px;color:var(--text);opacity:.7;text-align:center;max-width:440px;}
+.editor-frame{width:420px;height:420px;background:var(--panel-bg);border:2px solid var(--accent);box-shadow:4px 4px 0px var(--accent);}
+svg.editCanvas{width:100%;height:100%;display:block;touch-action:none;}
+.pt{fill:#ffffff;stroke:var(--accent);stroke-width:2;cursor:grab;}
+.pt:hover{fill:var(--accent-light);}
+.pt.selected{fill:var(--accent);stroke:#ffffff;stroke-width:2;}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+</style></head><body>
+<div class="window shadow-lg" style="width:460px;">
+<div class="window-titlebar"><span class="window-eyebrow">QuickDraw</span><h1><span data-i18n="editing"></span> — <span id="wordLbl"></span></h1></div>
+<div class="window-body" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+<div class="hint" data-i18n-html="editHint"></div>
+<div class="editor-frame"><svg class="editCanvas" id="ec" viewBox="0 0 300 300"></svg></div>
+<div class="toolbar">
+<button class="btn btn-sm" id="delBtn" data-i18n="delSel" disabled></button>
+<button class="btn btn-sm" id="resetBtn" data-i18n="reset"></button>
+<button class="btn btn-sm" id="sendBtn" data-i18n="sendBack"></button>
+<button class="btn" id="expBtn" data-i18n="exportSvgLong"></button>
+</div>
+<div class="footer">${CREDIT_HTML}</div>
+</div>
+</div>
+<script>
+var initialPayload = ${dataJson};
+var T = ${strJson};
+var LANG = "${lang}";
+var original = JSON.parse(JSON.stringify(initialPayload.strokes));
+var strokes = JSON.parse(JSON.stringify(initialPayload.strokes));
+var selectedPoints = [];
+var selectedSegment = null;
+var svg = document.getElementById("ec");
+var ns = "http://www.w3.org/2000/svg";
+var delBtn = document.getElementById("delBtn");
+var ACCENT = "#325be5";
+var ACCENT_LIGHT = "#e6ecfc";
+
+function applyT(){
+  document.documentElement.lang = LANG;
+  var label = initialPayload.word || T.noLabel;
+  document.title = T.editDocTitle + " — " + label;
+  document.getElementById("wordLbl").textContent = label;
+  document.querySelectorAll("[data-i18n]").forEach(function(el){ el.textContent = T[el.getAttribute("data-i18n")]; });
+  document.querySelectorAll("[data-i18n-html]").forEach(function(el){ el.innerHTML = T[el.getAttribute("data-i18n-html")]; });
+}
+window.addEventListener("message", function(e){
+  if(!e.data || e.data.type !== "quickdraw-lang") return;
+  T = e.data.strings; LANG = e.data.lang; applyT();
+});
+applyT();
+
+function keyOf(si,pi){ return si+":"+pi; }
+function isPointSelected(si,pi){ return selectedPoints.indexOf(keyOf(si,pi)) !== -1; }
+
+function render(){
+  svg.innerHTML = "";
+  strokes.forEach(function(pts, si){
+    var poly = document.createElementNS(ns,"polyline");
+    poly.setAttribute("points", pts.map(function(p){return p.x.toFixed(1)+","+p.y.toFixed(1);}).join(" "));
+    poly.setAttribute("fill","none");
+    poly.setAttribute("stroke",ACCENT);
+    poly.setAttribute("stroke-width","4");
+    poly.setAttribute("stroke-linecap","round");
+    poly.setAttribute("stroke-linejoin","round");
+    svg.appendChild(poly);
+  });
+  strokes.forEach(function(pts, si){
+    for(var i=0;i<pts.length-1;i++){
+      var a = pts[i], b = pts[i+1];
+      if(selectedSegment && selectedSegment.si===si && selectedSegment.pi===i){
+        var halo = document.createElementNS(ns,"line");
+        halo.setAttribute("x1",a.x); halo.setAttribute("y1",a.y);
+        halo.setAttribute("x2",b.x); halo.setAttribute("y2",b.y);
+        halo.setAttribute("stroke",ACCENT_LIGHT);
+        halo.setAttribute("stroke-width","12");
+        halo.setAttribute("stroke-linecap","round");
+        svg.appendChild(halo);
+        var hl = document.createElementNS(ns,"line");
+        hl.setAttribute("x1",a.x); hl.setAttribute("y1",a.y);
+        hl.setAttribute("x2",b.x); hl.setAttribute("y2",b.y);
+        hl.setAttribute("stroke",ACCENT);
+        hl.setAttribute("stroke-width","5");
+        hl.setAttribute("stroke-linecap","round");
+        svg.appendChild(hl);
+      }
+      var hit = document.createElementNS(ns,"line");
+      hit.setAttribute("x1",a.x); hit.setAttribute("y1",a.y);
+      hit.setAttribute("x2",b.x); hit.setAttribute("y2",b.y);
+      hit.setAttribute("stroke","transparent");
+      hit.setAttribute("stroke-width","14");
+      hit.style.cursor = "pointer";
+      hit.dataset.si = si; hit.dataset.pi = i;
+      hit.addEventListener("mousedown", onSegmentDown);
+      svg.appendChild(hit);
+    }
+  });
+  strokes.forEach(function(pts, si){
+    pts.forEach(function(p, pi){
+      var c = document.createElementNS(ns,"circle");
+      c.setAttribute("cx", p.x); c.setAttribute("cy", p.y); c.setAttribute("r", 5);
+      c.setAttribute("class","pt"+(isPointSelected(si,pi) ? " selected":""));
+      c.dataset.si = si; c.dataset.pi = pi;
+      c.addEventListener("mousedown", onPointDown);
+      svg.appendChild(c);
+    });
+  });
+  delBtn.disabled = !(selectedSegment || selectedPoints.length);
+}
+
+function toSvgPoint(evt){
+  var pt = svg.createSVGPoint();
+  pt.x = evt.clientX; pt.y = evt.clientY;
+  var m = svg.getScreenCTM().inverse();
+  return pt.matrixTransform(m);
+}
+
+var dragging = null; var moved = false; var dragShift = false;
+function onPointDown(evt){
+  evt.preventDefault(); evt.stopPropagation();
+  var si = parseInt(evt.target.dataset.si,10), pi = parseInt(evt.target.dataset.pi,10);
+  dragging = {si:si, pi:pi}; moved = false; dragShift = evt.shiftKey;
+  window.addEventListener("mousemove", onDragMove);
+  window.addEventListener("mouseup", onDragUp);
+}
+function onDragMove(evt){
+  if(!dragging) return;
+  moved = true;
+  var p = toSvgPoint(evt);
+  strokes[dragging.si][dragging.pi] = {x: Math.max(0,Math.min(300,p.x)), y: Math.max(0,Math.min(300,p.y))};
+  render();
+}
+function onDragUp(evt){
+  if(dragging && !moved){
+    var k = keyOf(dragging.si, dragging.pi);
+    selectedSegment = null;
+    if(dragShift){
+      var idx = selectedPoints.indexOf(k);
+      if(idx===-1) selectedPoints.push(k); else selectedPoints.splice(idx,1);
+    } else {
+      selectedPoints = [k];
+    }
+    render();
+  }
+  dragging = null;
+  window.removeEventListener("mousemove", onDragMove);
+  window.removeEventListener("mouseup", onDragUp);
+}
+
+function onSegmentDown(evt){
+  evt.preventDefault(); evt.stopPropagation();
+  var si = parseInt(evt.target.dataset.si,10), pi = parseInt(evt.target.dataset.pi,10);
+  selectedPoints = [];
+  selectedSegment = {si:si, pi:pi};
+  render();
+}
+
+var rectStart = null; var rectEl = null; var rectMoved = false;
+svg.addEventListener("mousedown", function(evt){
+  if(evt.target !== svg) return;
+  rectStart = toSvgPoint(evt); rectMoved = false;
+  rectEl = document.createElementNS(ns,"rect");
+  rectEl.setAttribute("fill","rgba(50,91,229,0.12)");
+  rectEl.setAttribute("stroke",ACCENT);
+  rectEl.setAttribute("stroke-dasharray","4 3");
+  rectEl.setAttribute("stroke-width","1.2");
+  svg.appendChild(rectEl);
+  window.addEventListener("mousemove", onRectMove);
+  window.addEventListener("mouseup", onRectUp);
+});
+function onRectMove(evt){
+  if(!rectStart) return;
+  rectMoved = true;
+  var p = toSvgPoint(evt);
+  var x = Math.min(rectStart.x, p.x), y = Math.min(rectStart.y, p.y);
+  var w = Math.abs(p.x-rectStart.x), h = Math.abs(p.y-rectStart.y);
+  rectEl.setAttribute("x",x); rectEl.setAttribute("y",y);
+  rectEl.setAttribute("width",w); rectEl.setAttribute("height",h);
+}
+function onRectUp(evt){
+  window.removeEventListener("mousemove", onRectMove);
+  window.removeEventListener("mouseup", onRectUp);
+  if(rectEl && rectEl.parentNode) rectEl.parentNode.removeChild(rectEl);
+  if(!rectStart){ return; }
+  var wAttr = rectEl ? parseFloat(rectEl.getAttribute("width")) : 0;
+  var hAttr = rectEl ? parseFloat(rectEl.getAttribute("height")) : 0;
+  if(!rectMoved || (wAttr<3 && hAttr<3)){
+    selectedPoints = []; selectedSegment = null;
+    rectStart = null;
+    render();
+    return;
+  }
+  var p = toSvgPoint(evt);
+  var x1 = Math.min(rectStart.x,p.x), x2 = Math.max(rectStart.x,p.x);
+  var y1 = Math.min(rectStart.y,p.y), y2 = Math.max(rectStart.y,p.y);
+  var found = [];
+  strokes.forEach(function(pts,si){
+    pts.forEach(function(pt,pi){
+      if(pt.x>=x1 && pt.x<=x2 && pt.y>=y1 && pt.y<=y2){ found.push(keyOf(si,pi)); }
+    });
+  });
+  selectedPoints = found;
+  selectedSegment = null;
+  rectStart = null;
+  render();
+}
+
+function deleteSelected(){
+  if(selectedSegment){
+    var si = selectedSegment.si, cut = selectedSegment.pi;
+    var st = strokes[si];
+    var part1 = st.slice(0, cut+1);
+    var part2 = st.slice(cut+1);
+    var replacement = [];
+    if(part1.length >= 2) replacement.push(part1);
+    if(part2.length >= 2) replacement.push(part2);
+    var args = [si,1].concat(replacement);
+    strokes.splice.apply(strokes, args);
+    selectedSegment = null;
+  } else if(selectedPoints.length){
+    var byStroke = {};
+    selectedPoints.forEach(function(k){
+      var parts = k.split(":"); var si = parseInt(parts[0],10), pi = parseInt(parts[1],10);
+      (byStroke[si] = byStroke[si] || []).push(pi);
+    });
+    var siList = Object.keys(byStroke).map(Number).sort(function(a,b){return b-a;});
+    siList.forEach(function(si){
+      var pis = byStroke[si].sort(function(a,b){return b-a;});
+      var st = strokes[si];
+      pis.forEach(function(pi){ st.splice(pi,1); });
+      if(st.length < 2){ strokes.splice(si,1); }
+    });
+    selectedPoints = [];
+  }
+  render();
+}
+
+delBtn.addEventListener("click", deleteSelected);
+document.addEventListener("keydown", function(e){
+  if(e.key==="Delete" || e.key==="Backspace"){ e.preventDefault(); deleteSelected(); }
+});
+document.getElementById("resetBtn").addEventListener("click", function(){
+  strokes = JSON.parse(JSON.stringify(original)); selectedPoints = []; selectedSegment = null; render();
+});
+document.getElementById("sendBtn").addEventListener("click", function(){
+  if(window.opener){ window.opener.postMessage({type:"quickdraw-edit-update", index: initialPayload.index, strokes: strokes}, "*"); }
+});
+document.getElementById("expBtn").addEventListener("click", function(){
+  var svgStr = "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 300 300\\" width=\\"600\\" height=\\"600\\">";
+  svgStr += "<rect width=\\"300\\" height=\\"300\\" fill=\\"#ffffff\\"/>";
+  strokes.forEach(function(pts){
+    var pointsStr = pts.map(function(p){return p.x.toFixed(1)+","+p.y.toFixed(1);}).join(" ");
+    svgStr += "<polyline points=\\""+pointsStr+"\\" fill=\\"none\\" stroke=\\""+ACCENT+"\\" stroke-width=\\"5\\" stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\"/>";
+  });
+  svgStr += "</svg>";
+  var blob = new Blob([svgStr], {type:"image/svg+xml"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  var safeName = (initialPayload.word || "dessin").replace(/[^a-z0-9_-]/gi,"_");
+  a.href = url; a.download = safeName + "_" + (initialPayload.index+1) + "_edite.svg";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+render();
+<\/script>
+</body></html>`;
+  }
+
+  // ---------- Aperçu de la collection ----------
+  function pickPreviewSample(){
+    const sampleSize = Math.min(200, lines.length);
+    const seen = new Set();
+    const chosen = [];
+    let guard = 0;
+    while(chosen.length < sampleSize && guard < sampleSize*50 && seen.size < lines.length){
+      guard++;
+      const idx = Math.floor(Math.random()*lines.length);
+      if(seen.has(idx)) continue;
+      seen.add(idx);
+      const obj = parseLine(idx);
+      if(!obj || !obj.drawing || !obj.drawing.length) continue;
+      chosen.push({ word: obj.word || '', polylines: buildScaledPolylines(obj.drawing) });
+    }
+    return { items: chosen, cols: 10, total: lines.length };
+  }
+
+  previewBtn.addEventListener('click', ()=>{
+    if(lines.length===0) return;
+    const payload = pickPreviewSample();
+    const win = window.open('', 'quickdraw_preview', 'width=980,height=1000');
+    if(!win){ alert(t('popupBlocked')); return; }
+    win.document.open();
+    win.document.write(buildPreviewHtml(payload));
+    win.document.close();
+    registerWin(win);
+  });
+
+  function buildPreviewHtml(payload){
+    const dataJson = JSON.stringify(payload).replace(/</g,'\\u003c');
+    const strJson = JSON.stringify(I18N[lang]).replace(/</g,'\\u003c');
+    return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="UTF-8"><title></title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+${THEME_CSS}
+.wrap{max-width:1060px;margin:0 auto;padding:24px 20px 40px;}
+.head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+.grid{display:grid;grid-template-columns:repeat(${payload.cols}, 1fr);gap:6px;background:#ffffff;}
+.cell{background:#ffffff;aspect-ratio:1/1;}
+.cell svg{width:100%;height:100%;display:block;}
+.footer{margin-top:22px;}
+</style></head><body>
+<div class="wrap">
+<div class="window shadow-md" style="margin-bottom:18px;">
+<div class="window-titlebar"><span class="window-eyebrow">QuickDraw</span><h1 data-i18n="previewTitle"></h1></div>
+<div class="window-body head">
+<span class="badge" id="count"></span>
+<div style="display:flex;gap:8px;">
+<button class="btn btn-sm" id="newBtn" data-i18n="newPreview"></button>
+<button class="btn" id="expBtn" data-i18n="exportSvgLong"></button>
+</div>
+</div>
+</div>
+<div class="grid" id="grid"></div>
+<div class="footer">${CREDIT_HTML}</div>
+</div>
+<script>
+var payload = ${dataJson};
+var T = ${strJson};
+var LANG = "${lang}";
+var ns = "http://www.w3.org/2000/svg";
+var grid = document.getElementById("grid");
+var countEl = document.getElementById("count");
+
+function applyT(){
+  document.documentElement.lang = LANG;
+  document.title = T.previewTitle;
+  document.querySelectorAll("[data-i18n]").forEach(function(el){ el.textContent = T[el.getAttribute("data-i18n")]; });
+  var loc = LANG === "fr" ? "fr-FR" : "en-US";
+  countEl.textContent = T.previewCount.split("{n}").join(payload.items.length).split("{total}").join(payload.total.toLocaleString(loc));
+}
+
+function renderGrid(){
+  grid.style.gridTemplateColumns = "repeat(" + payload.cols + ", 1fr)";
+  grid.innerHTML = "";
+  payload.items.forEach(function(item){
+    var cell = document.createElement("div");
+    cell.className = "cell";
+    var svg = document.createElementNS(ns,"svg");
+    svg.setAttribute("viewBox","0 0 300 300");
+    item.polylines.forEach(function(pts){
+      var poly = document.createElementNS(ns,"polyline");
+      poly.setAttribute("points", pts.map(function(p){return p.x.toFixed(1)+","+p.y.toFixed(1);}).join(" "));
+      poly.setAttribute("fill","none");
+      poly.setAttribute("stroke","#325be5");
+      poly.setAttribute("stroke-width","9");
+      poly.setAttribute("stroke-linecap","round");
+      poly.setAttribute("stroke-linejoin","round");
+      svg.appendChild(poly);
+    });
+    cell.appendChild(svg);
+    grid.appendChild(cell);
+  });
+  applyT();
+}
+renderGrid();
+
+document.getElementById("newBtn").addEventListener("click", function(){
+  if(window.opener){ window.opener.postMessage({type:"quickdraw-request-preview"}, "*"); }
+});
+window.addEventListener("message", function(e){
+  if(!e.data) return;
+  if(e.data.type === "quickdraw-preview-data"){ payload = e.data.payload; renderGrid(); }
+  if(e.data.type === "quickdraw-lang"){ T = e.data.strings; LANG = e.data.lang; applyT(); }
+});
+document.getElementById("expBtn").addEventListener("click", function(){
+  var cols = payload.cols;
+  var rows = Math.ceil(payload.items.length/cols);
+  var cellSize = 130, gap = 8;
+  var w = cols*cellSize + (cols-1)*gap;
+  var h = rows*cellSize + (rows-1)*gap;
+  var q = String.fromCharCode(39);
+  var svgStr = "<svg xmlns=" + q + "http://www.w3.org/2000/svg" + q + " viewBox=" + q + "0 0 " + w + " " + h + q + " width=" + q + w + q + " height=" + q + h + q + ">";
+  svgStr += "<rect width=" + q + w + q + " height=" + q + h + q + " fill=" + q + "#ffffff" + q + "/>";
+  payload.items.forEach(function(item, i){
+    var col = i % cols, row = Math.floor(i/cols);
+    var x = col*(cellSize+gap), y = row*(cellSize+gap);
+    var scale = cellSize/300;
+    svgStr += "<g transform=" + q + "translate(" + x + "," + y + ") scale(" + scale + ")" + q + ">";
+    item.polylines.forEach(function(pts){
+      var pointsStr = pts.map(function(p){return p.x.toFixed(1)+","+p.y.toFixed(1);}).join(" ");
+      svgStr += "<polyline points=" + q + pointsStr + q + " fill=" + q + "none" + q + " stroke=" + q + "#325be5" + q + " stroke-width=" + q + "9" + q + " stroke-linecap=" + q + "round" + q + " stroke-linejoin=" + q + "round" + q + "/>";
+    });
+    svgStr += "</g>";
+  });
+  svgStr += "</svg>";
+  var blob = new Blob([svgStr], {type:"image/svg+xml"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = "apercu_collection_" + payload.items.length + ".svg";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+<\/script>
+</body></html>`;
+  }
+
+  // ---------- Démarrage ----------
+  applyLang();
+})();
+</script>
+</body>
+</html>

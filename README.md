@@ -11,7 +11,7 @@ An offline viewer and editor for the `.ndjson` drawing files of Google's [Quick,
 Not affiliated with or endorsed by Google.
 
 A one-page visual guide is in [`docs/QuickDraw-Explorer-guide.pdf`](docs/QuickDraw-Explorer-guide.pdf).
-
+You can find all the ndjson made by google quick draw here : https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/simplified;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false
 ## What it does
 
 - **Open** a local `.ndjson` file (nothing is uploaded; there is no server).

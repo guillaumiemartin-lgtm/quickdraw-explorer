@@ -6,6 +6,8 @@
 >
 > It was built with Claude (Anthropic). To make it easy to carry on with another AI, the repo includes [`AGENTS.md`](AGENTS.md) (instructions for coding agents) and [`SPEC.md`](SPEC.md) (what the app is supposed to do). Give an AI the code plus these two files and it should be able to pick up where I stopped.
 
+Buy me a cofee if you want : [![Soutenir sur Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/martin_guillaumie/donate)
+
 An offline viewer and editor for the `.ndjson` drawing files of Google's [Quick, Draw!](https://github.com/googlecreativelab/quickdraw-dataset) dataset. Open a file, see how many drawings it contains, flip through them, move or delete points, preview a random grid of 200 drawings, and export SVG.
 
 Not affiliated with or endorsed by Google.

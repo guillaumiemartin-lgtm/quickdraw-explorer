@@ -8,7 +8,8 @@
 
 Buy me a cofee if you want :[![Soutenir sur Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/martinguillaumie)
 
-An offline viewer and editor for the `.ndjson` drawing files of Google's [Quick, Draw!](https://github.com/googlecreativelab/quickdraw-dataset) dataset. Open a file, see how many drawings it contains, flip through them, move or delete points, preview a random grid of 200 drawings, and export SVG.
+An offline viewer and editor for the `.ndjson` drawing files of Google's [Quick, Draw!](https://github.com/googlecreativelab/quickdraw-dataset) dataset. 
+Open a file, see how many drawings it contains, flip through them, move or delete points, preview a random grid of 200 drawings, and export SVG.
 
 Not affiliated with or endorsed by Google.
 

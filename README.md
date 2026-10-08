@@ -14,6 +14,7 @@ Open a file, see how many drawings it contains, flip through them, move or delet
 Not affiliated with or endorsed by Google.
 
 you can use the tool directly here : https://guillaumiemartin-lgtm.github.io/quickdraw-explorer/
+
 A one-page visual guide is in [`docs/QuickDraw-Explorer-guide.pdf`](docs/QuickDraw-Explorer-guide.pdf).
 
 You can find all the ndjson made by google quick draw here : https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/simplified;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false
